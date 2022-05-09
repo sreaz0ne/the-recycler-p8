@@ -47,7 +47,7 @@ end
 function updt_bullets()
 	for b in all(bullets) do
 		b.y-=b.speed
-		if b.y < 7 then
+		if b.y < -7 then
 			del(bullets,b)
 		end
 	end
@@ -61,8 +61,8 @@ function create_stars()
 		star={
 			x=rnd(128),
 			y=rnd(128),
-			col=6,
-			speed=1.5
+			col=13,
+			speed=1
 		}
 		add(stars,star)
 	end
@@ -71,7 +71,7 @@ function create_stars()
 			x=rnd(128),
 			y=rnd(128),
 			col=7,
-			speed=3.5
+			speed=3
 		}
 		add(stars,star)
 	end
