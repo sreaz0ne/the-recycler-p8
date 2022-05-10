@@ -9,11 +9,8 @@ function _init()
 end
 
 function _update60()
-	if (btn(➡️))	plyr.x+=plyr.speed
-	if (btn(⬅️)) plyr.x-=plyr.speed
-	if (btn(⬆️)) plyr.y-=plyr.speed
-	if (btn(⬇️)) plyr.y+=plyr.speed
-	if (btnp(❎)) shoot()
+	
+	updt_plyr(plyr)
 	
 	if #enemies==0 then
 		spwn_enemies(flr(rnd(5))+1)
@@ -40,6 +37,7 @@ function _draw()
 	for b in all(bullets) do 
 		spr(1,b.x,b.y)
 	end
+
 end
 -->8
 --bullets
@@ -118,6 +116,29 @@ function updt_enemies()
 			del(enemies,e)
 		end
 	end
+end
+-->8
+--player
+
+function updt_plyr(p)
+	if btn(➡️) 
+	   and p.x+p.speed<=120 then
+		p.x+=p.speed
+	end
+	if btn(⬅️)
+			 and p.x-p.speed>=0 then
+	 p.x-=p.speed
+	end
+	if btn(⬆️)
+			 and p.y-p.speed>=0 then
+			 p.y-=p.speed
+	end
+	if btn(⬇️)
+	   and p.y+p.speed<=120 then
+	   p.y+=p.speed
+	end
+	
+	if (btnp(❎)) shoot()
 end
 __gfx__
 00066000b000000b0502205000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
