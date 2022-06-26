@@ -3,6 +3,7 @@ version 36
 __lua__
 function _init()
 	t=0
+	score=0
 	plyr={
 		x=60,
 		y=90,
@@ -49,7 +50,9 @@ function _draw()
 	for b in all(bullets) do 
 		spr(48,b.x,b.y)
 	end
-
+	--** hud **
+	--score
+	print(score,64-#tostr(score)*2,2,10)
 end
 -->8
 --bullets
@@ -78,6 +81,7 @@ function updt_bullets()
 				e.hp-=1
 				if e.hp <= 0 then
 					del(enemies,e)
+					score+=100
 				end
 			end
 		end
