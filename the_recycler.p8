@@ -3,27 +3,18 @@ version 36
 __lua__
 --main
 function _init()
-	t=0
-	state=1
-	score=0
-	plyr={
-		x=60,
-		y=90,
-		speed=2,
-		hp=3,
-		box={x1=2,x2=5,y1=1,y2=6},
-		sprt=0
-	}
-	bullets={}
-	enemies={}
-	pflamespr=16
+	state=0
 	create_stars()
 end
 
 function _update60()
-	if (state==0) updt_title()
-	if (state==1) updt_game()
-	if (state==2) updt_gameover()
+	if state==0 then
+		updt_title()
+	elseif state==1 then
+	 updt_game()
+	elseif state==2 then
+	 updt_gameover()
+	end
 end
 
 function _draw()
@@ -59,19 +50,60 @@ function coll(a,b)
 		return true
 	end
 end
+
+-- horizontal text center
+function h_txt_cntr(str)
+	return 64-#str*2
+end
+
+-- vertical text center
+function v_txt_cntr()
+	return 61
+end
 -->8
 --state functions
 
 -- ** title **
 function updt_title()
-
+	if (btn(❎)) init_game()
 end
 
 function draw_title()
-
+	cls()
+	ttlstr="the recycler"
+	strtstr="press ❎/x to start"
+	print(
+		ttlstr,
+		h_txt_cntr(ttlstr),
+		10,
+		7
+	)
+	print(
+		strtstr,
+		h_txt_cntr(strtstr),
+		v_txt_cntr()+40,
+		6
+	)
 end
 
 -- ** game **
+function init_game()
+	t=0
+	score=0
+	plyr={
+		x=60,
+		y=90,
+		speed=2,
+		hp=3,
+		box={x1=2,x2=5,y1=1,y2=6},
+		sprt=0
+	}
+	bullets={}
+	enemies={}
+	pflamespr=16
+	state=1
+end
+
 function updt_game()
 	t+=1
 	
@@ -109,11 +141,32 @@ end
 
 -- ** game over **
 function updt_gameover()
-
+	if (btn(❎)) init_game()
 end
 
 function draw_gameover()
-
+	cls()
+	gmstr="game over"
+	scrstr="score: "..score
+	rstrtstr="press ❎/x to restart"
+	print(
+		gmstr,
+		h_txt_cntr(gmstr),
+		v_txt_cntr()-14,
+		10
+	)
+	print(
+		scrstr,
+		h_txt_cntr(scrstr),
+		v_txt_cntr(),
+		7
+	)
+	print(
+		rstrtstr,
+		h_txt_cntr(rstrtstr),
+		v_txt_cntr()+40,
+		6
+	)
 end
 -->8
 --stars
@@ -204,7 +257,8 @@ end
 function plyr_take_dmg(dmg)
 	plyr.hp-=dmg
 	if plyr.hp <= 0 then
-		--todo
+		--game over state
+		state=2
 	end
 end
 -->8
