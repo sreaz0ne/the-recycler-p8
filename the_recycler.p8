@@ -1,8 +1,10 @@
 pico-8 cartridge // http://www.pico-8.com
 version 36
 __lua__
+--main
 function _init()
 	t=0
+	state=1
 	score=0
 	plyr={
 		x=60,
@@ -19,40 +21,15 @@ function _init()
 end
 
 function _update60()
-	
-	t+=1
-	
-	updt_plyr()
-	
-	if #enemies==0 then
-		spwn_enemies(flr(rnd(7))+1)
-	end
-	
-	updt_bullets()
-	updt_stars()
-	updt_enemies()
+	if (state==0) updt_title()
+	if (state==1) updt_game()
+	if (state==2) updt_gameover()
 end
 
 function _draw()
-	cls()
-	--stars
-	for s in all(stars) do
-		pset(s.x,s.y,s.col)
-	end
-	--ship
-	spr(plyr.sprt,plyr.x,plyr.y)
-	spr(pflamespr,plyr.x,plyr.y+8)
-	--enemies
-	for e in all(enemies) do
-		spr(32,e.x,e.y)
-	end
-	--bullets
-	for b in all(bullets) do 
-		spr(48,b.x,b.y)
-	end
-	--** hud **
-	--score
-	print(score,64-#tostr(score)*2,2,10)
+	if (state==0) draw_title()
+	if (state==1) draw_game()
+	if (state==2) draw_gameover()
 end
 -->8
 --functions
@@ -81,6 +58,62 @@ function coll(a,b)
 	else
 		return true
 	end
+end
+-->8
+--state functions
+
+-- ** title **
+function updt_title()
+
+end
+
+function draw_title()
+
+end
+
+-- ** game **
+function updt_game()
+	t+=1
+	
+	updt_stars()
+	updt_enemies()
+	updt_plyr()
+	updt_bullets()
+	
+	if #enemies==0 then
+		spwn_enemies(flr(rnd(7))+1)
+	end
+end
+
+function draw_game()
+	cls()
+	--stars
+	for s in all(stars) do
+		pset(s.x,s.y,s.col)
+	end
+	--enemies
+	for e in all(enemies) do
+		spr(32,e.x,e.y)
+	--ship
+	spr(plyr.sprt,plyr.x,plyr.y)
+	spr(pflamespr,plyr.x,plyr.y+8)
+	end
+	--bullets
+	for b in all(bullets) do 
+		spr(48,b.x,b.y)
+	end
+	--** hud **
+	--score
+	print(score,64-#tostr(score)*2,2,10)
+end
+
+-- ** game over **
+function updt_gameover()
+
+end
+
+function draw_gameover()
+
 end
 -->8
 --stars
