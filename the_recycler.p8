@@ -55,32 +55,31 @@ function _draw()
 	print(score,64-#tostr(score)*2,2,10)
 end
 -->8
---bullets
+--functions
 
-function shoot()
-	bullet={
-		x=plyr.x,
-		y=plyr.y,
-		speed=3,
-		box={x1=3,x2=4,y1=0,y2=2}
-	}
-	add(bullets,bullet)
-	sfx(0)
+--box collision pos
+function abs_box(s)
+	box={}
+	box.x1 = s.box.x1 + s.x
+	box.x2 = s.box.x2 + s.x
+	box.y1 = s.box.y1 + s.y
+	box.y2 = s.box.y2 + s.y
+	return box
 end
 
-function updt_bullets()
-	for b in all(bullets) do
-		b.y-=b.speed
-		if b.y < -7 then
-			del(bullets,b)
-		end
-		
-		for e in all(enemies) do
-			if coll(b,e) then
-				del(bullets,b)
-				e_take_dmg(e,1)
-			end
-		end
+--detect collision
+function coll(a,b)
+
+	box_a = abs_box(a)
+	box_b = abs_box(b)
+	
+	if box_a.x1 > box_b.x2
+	or box_a.y1 > box_b.y2
+	or box_a.x2 < box_b.x1
+	or box_a.y2 < box_b.y1 then
+		return false
+	else
+		return true
 	end
 end
 -->8
@@ -115,40 +114,6 @@ function updt_stars()
 			s.y=-rnd(60)
 			s.x=rnd(128)
 		end
-	end
-end
--->8
---enemies
-
-function spwn_enemies(nb)
-	gap=(128-8*nb)/(nb+1)
-	for i=1,nb do
-		enemy={
-			x=gap*i+8*(i-1),
-			y=-flr(rnd(32)),
-			life=4,
-			speed=0.3,
-			hp=3,
-			box={x1=0,x2=7,y1=0,y2=7}
-		}
-		add(enemies,enemy)
-	end
-end
-
-function updt_enemies()
-	for e in all(enemies) do
-		e.y+=e.speed
-		if e.y >= 128 then
-			del(enemies,e)
-		end
-	end
-end
-
-function e_take_dmg(e,dmg) 
-	e.hp-=dmg
-	if e.hp <= 0 then
-		del(enemies,e)
-		score+=100
 	end
 end
 -->8
@@ -210,28 +175,66 @@ function plyr_take_dmg(dmg)
 	end
 end
 -->8
---functions
-function abs_box(s)
-	box={}
-	box.x1 = s.box.x1 + s.x
-	box.x2 = s.box.x2 + s.x
-	box.y1 = s.box.y1 + s.y
-	box.y2 = s.box.y2 + s.y
-	return box
+--enemies
+
+function spwn_enemies(nb)
+	gap=(128-8*nb)/(nb+1)
+	for i=1,nb do
+		enemy={
+			x=gap*i+8*(i-1),
+			y=-flr(rnd(32)),
+			life=4,
+			speed=0.3,
+			hp=3,
+			box={x1=0,x2=7,y1=0,y2=7}
+		}
+		add(enemies,enemy)
+	end
 end
 
-function coll(a,b)
+function updt_enemies()
+	for e in all(enemies) do
+		e.y+=e.speed
+		if e.y >= 128 then
+			del(enemies,e)
+		end
+	end
+end
 
-	box_a = abs_box(a)
-	box_b = abs_box(b)
-	
-	if box_a.x1 > box_b.x2
-	or box_a.y1 > box_b.y2
-	or box_a.x2 < box_b.x1
-	or box_a.y2 < box_b.y1 then
-		return false
-	else
-		return true
+function e_take_dmg(e,dmg) 
+	e.hp-=dmg
+	if e.hp <= 0 then
+		del(enemies,e)
+		score+=100
+	end
+end
+-->8
+--bullets
+
+function shoot()
+	bullet={
+		x=plyr.x,
+		y=plyr.y,
+		speed=3,
+		box={x1=3,x2=4,y1=0,y2=2}
+	}
+	add(bullets,bullet)
+	sfx(0)
+end
+
+function updt_bullets()
+	for b in all(bullets) do
+		b.y-=b.speed
+		if b.y < -7 then
+			del(bullets,b)
+		end
+		
+		for e in all(enemies) do
+			if coll(b,e) then
+				del(bullets,b)
+				e_take_dmg(e,1)
+			end
+		end
 	end
 end
 __gfx__
