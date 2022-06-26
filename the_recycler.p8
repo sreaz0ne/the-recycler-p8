@@ -78,11 +78,7 @@ function updt_bullets()
 		for e in all(enemies) do
 			if coll(b,e) then
 				del(bullets,b)
-				e.hp-=1
-				if e.hp <= 0 then
-					del(enemies,e)
-					score+=100
-				end
+				e_take_dmg(e,1)
 			end
 		end
 	end
@@ -145,10 +141,14 @@ function updt_enemies()
 		if e.y >= 128 then
 			del(enemies,e)
 		end
-		
-		if coll(e,plyr) then
-			del(enemies,e)
-		end
+	end
+end
+
+function e_take_dmg(e,dmg) 
+	e.hp-=dmg
+	if e.hp <= 0 then
+		del(enemies,e)
+		score+=100
 	end
 end
 -->8
@@ -191,6 +191,22 @@ function updt_plyr()
 		else
 		 pflamespr+=1
 		end
+	end
+	
+	--check collisions
+	for e in all(enemies) do
+
+		if coll(e,plyr) then
+			plyr_take_dmg(1)
+			e_take_dmg(e,e.hp)
+		end
+	end
+end
+
+function plyr_take_dmg(dmg)
+	plyr.hp-=dmg
+	if plyr.hp <= 0 then
+		--todo
 	end
 end
 -->8
