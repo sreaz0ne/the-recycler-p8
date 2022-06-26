@@ -24,7 +24,7 @@ function _update60()
 	updt_plyr()
 	
 	if #enemies==0 then
-		spwn_enemies(flr(rnd(5))+1)
+		spwn_enemies(flr(rnd(7))+1)
 	end
 	
 	updt_bullets()
@@ -121,10 +121,11 @@ end
 --enemies
 
 function spwn_enemies(nb)
+	gap=(128-8*nb)/(nb+1)
 	for i=1,nb do
 		enemy={
-			x=flr(rnd(112)) + 8,
-			y=-24,
+			x=gap*i+8*(i-1),
+			y=-flr(rnd(32)),
 			life=4,
 			speed=0.3,
 			hp=3,
