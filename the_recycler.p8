@@ -215,7 +215,7 @@ function init_plyr()
 		box={x1=2,x2=5,y1=1,y2=6},
 		sprt=0,
 		flamespr=16,
-		timetoshoot=8
+		timetoshoot=10
 	}
 end
 
@@ -254,7 +254,7 @@ function updt_plyr()
 	if btn(❎)
 	and plyr.timetoshoot==0 then
 		shoot()
-		plyr.timetoshoot=8
+		plyr.timetoshoot=10
 	end
 	--animate player flame
 	if (t%4==0) then
@@ -339,7 +339,7 @@ function shoot()
 	bullet={
 		x=plyr.x,
 		y=plyr.y,
-		speed=3,
+		speed=2,
 		box={x1=3,x2=4,y1=0,y2=2}
 	}
 	add(bullets,bullet)
