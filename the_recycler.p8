@@ -215,7 +215,8 @@ function init_plyr()
 		box={x1=2,x2=5,y1=1,y2=6},
 		sprt=0,
 		flamespr=16,
-		timetoshoot=10
+		timetoshoot=10,
+		bulletspd=2.5
 	}
 end
 
@@ -253,7 +254,7 @@ function updt_plyr()
 	
 	if btn(❎)
 	and plyr.timetoshoot==0 then
-		shoot()
+		shoot(plyr)
 		plyr.timetoshoot=10
 	end
 	--animate player flame
@@ -292,8 +293,8 @@ function spwn_enemies(nb)
 		enemy={
 			x=gap*i+8*(i-1),
 			y=-flr(rnd(32)),
-			life=4,
-			speed=0.3,
+			life=3,
+			speed=0.2,
 			hp=3,
 			box={x1=0,x2=7,y1=0,y2=7},
 			flamespr=24
@@ -335,11 +336,11 @@ end
 -->8
 --bullets
 
-function shoot()
+function shoot(s)
 	bullet={
-		x=plyr.x,
-		y=plyr.y,
-		speed=2,
+		x=s.x,
+		y=s.y,
+		speed=s.bulletspd,
 		box={x1=3,x2=4,y1=0,y2=2}
 	}
 	add(bullets,bullet)
