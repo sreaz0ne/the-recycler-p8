@@ -105,7 +105,7 @@ function updt_game()
 	updt_bullets()
 	
 	if #enemies==0 then
-		spwn_enemies(flr(rnd(7))+1)
+		spwn_enemies(flr(rnd(9))+1)
 	end
 end
 
