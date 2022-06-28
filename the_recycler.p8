@@ -117,12 +117,18 @@ function draw_game()
 	end
 	--enemies
 	for e in all(enemies) do
+		if e.flsh>0 then
+			for i=1,15 do
+				pal(i,7)
+			end
+		end
 		spr(32,e.x,e.y)
 		spr(
 			e.flamespr,
 			e.x,
 			e.y-8
 		)
+		pal()
 	end
 	--ship
 	spr(plyr.sprt,plyr.x,plyr.y)
@@ -255,7 +261,7 @@ function updt_plyr()
 	if btn(❎)
 	and plyr.timetoshoot==0 then
 		shoot(plyr)
-		plyr.timetoshoot=10
+		plyr.timetoshoot=8
 	end
 	--animate player flame
 	if (t%4==0) then
@@ -269,7 +275,6 @@ function updt_plyr()
 	
 	--check collisions
 	for e in all(enemies) do
-
 		if coll(e,plyr) then
 			plyr_take_dmg(1)
 			e_take_dmg(e,e.hp)
@@ -297,7 +302,8 @@ function spwn_enemies(nb)
 			speed=0.2,
 			hp=3,
 			box={x1=0,x2=7,y1=0,y2=7},
-			flamespr=24
+			flamespr=24,
+			flsh=0
 		}
 		add(enemies,enemy)
 	end
@@ -306,6 +312,7 @@ end
 function updt_enemies()
 	for e in all(enemies) do
 		e.y+=e.speed
+		e.flsh-=1
 		
 		--animate enemy flame
 		if (t%4==0) then
@@ -326,6 +333,7 @@ end
 
 function e_take_dmg(e,dmg) 
 	e.hp-=dmg
+	e.flsh=4
 	if e.hp <= 0 then
 		del(enemies,e)
 		score+=100
