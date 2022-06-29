@@ -28,10 +28,10 @@ end
 --box collision pos
 function abs_box(s)
 	box={}
-	box.x1 = s.box.x1 + s.x
-	box.x2 = s.box.x2 + s.x
-	box.y1 = s.box.y1 + s.y
-	box.y2 = s.box.y2 + s.y
+	box.x1 = flr(s.box.x1 + s.x)
+	box.x2 = flr(s.box.x2 + s.x)
+	box.y1 = flr(s.box.y1 + s.y)
+	box.y2 = flr(s.box.y2 + s.y)
 	return box
 end
 
@@ -139,11 +139,16 @@ function draw_game()
 	)
 	--bullets
 	for b in all(bullets) do 
-		spr(48,b.x,b.y)
+		spr(b.sprt,b.x,b.y)
 	end
 	--** hud **
 	--score
-	print(score,64-#tostr(score)*2,2,10)
+	print(
+		score,
+		h_txt_cntr(tostr(score)),
+		2,
+		10
+	)
 end
 
 -- ** game over **
@@ -214,6 +219,7 @@ end
 
 function init_plyr()
 	plyr={
+		stype="p",
 		x=60,
 		y=90,
 		speed=2,
@@ -221,8 +227,7 @@ function init_plyr()
 		box={x1=2,x2=5,y1=1,y2=6},
 		sprt=0,
 		flamespr=16,
-		timetoshoot=10,
-		bulletspd=2.5
+		timetoshoot=10
 	}
 end
 
@@ -296,14 +301,17 @@ function spwn_enemies(nb)
 	gap=(128-8*nb)/(nb+1)
 	for i=1,nb do
 		enemy={
-			x=gap*i+8*(i-1),
+			stype="e",
+			x=flr(gap*i+8*(i-1)),
 			y=-flr(rnd(32)),
 			life=3,
 			speed=0.2,
 			hp=3,
 			box={x1=0,x2=7,y1=0,y2=7},
 			flamespr=24,
-			flsh=0
+			flsh=0,
+			firerate=flr(rnd(111))+80,
+			timetosht=flr(rnd(101))+30
 		}
 		add(enemies,enemy)
 	end
@@ -313,6 +321,13 @@ function updt_enemies()
 	for e in all(enemies) do
 		e.y+=e.speed
 		e.flsh-=1
+		if (e.x>0) e.timetosht-=1
+		
+		if e.timetosht==0
+		and e.x>0 then
+			shoot(e)
+			e.timetosht=e.firerate
+		end
 		
 		--animate enemy flame
 		if (t%4==0) then
@@ -344,15 +359,38 @@ end
 -->8
 --bullets
 
+function getbllttype(tp)
+	local b={}
+	if tp=="p" then
+		b={
+			sprt=48,
+			box={x1=3,x2=4,y1=0,y2=2},
+			speed=2.5,
+			bsfx=0
+		}
+	elseif tp=="e" then
+		b={
+			sprt=49,
+			box={x1=3,x2=4,y1=5,y2=7},
+			speed=-0.5,
+			bsfx=nil
+		}
+	end
+	return b
+end
+
 function shoot(s)
+	b=getbllttype(s.stype)
 	bullet={
+		btype=s.stype,
 		x=s.x,
 		y=s.y,
-		speed=s.bulletspd,
-		box={x1=3,x2=4,y1=0,y2=2}
+		speed=b.speed,
+		box=b.box,
+		sprt=b.sprt
 	}
 	add(bullets,bullet)
-	sfx(0)
+	if (b.bsfx!=nil) sfx(b.bsfx)
 end
 
 function updt_bullets()
@@ -362,10 +400,17 @@ function updt_bullets()
 			del(bullets,b)
 		end
 		
-		for e in all(enemies) do
-			if coll(b,e) then
+		if b.btype=="p" then
+			for e in all(enemies) do
+				if coll(b,e) then
+					del(bullets,b)
+					e_take_dmg(e,1)
+				end
+			end
+		elseif b.btype=="e" then
+			if coll(b,plyr) then
 				del(bullets,b)
-				e_take_dmg(e,1)
+				plyr_take_dmg(1)
 			end
 		end
 	end
@@ -398,5 +443,10 @@ c7c00c7c77700777c7c00c7c0c0000c00c7cc7c0077777700c7cc7c000c00c000000000000000000
 000bb000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 000bb000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00033000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000880000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000ee0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+00000000000ee0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __sfx__
 00010000375503c5503d5503b55037550325502c5502855025550215501d5501a55015550115500c5500855004550015501b50000500015000050000500035000150005500025000050001500015000150000500
