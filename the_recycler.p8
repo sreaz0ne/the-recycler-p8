@@ -131,12 +131,7 @@ function draw_game()
 		pal()
 	end
 	--ship
-	spr(plyr.sprt,plyr.x,plyr.y)
-	spr(
-		plyr.flamespr,
-		plyr.x,
-		plyr.y+8
-	)
+	drw_plyr()
 	--bullets
 	for b in all(bullets) do 
 		spr(b.sprt,b.x,b.y)
@@ -227,7 +222,8 @@ function init_plyr()
 		box={x1=2,x2=5,y1=1,y2=6},
 		sprt=0,
 		flamespr=16,
-		timetoshoot=10
+		timetoshoot=10,
+		invul=0
 	}
 end
 
@@ -238,6 +234,9 @@ function updt_plyr()
 	
 	if plyr.timetoshoot>0 then
 		plyr.timetoshoot-=1
+	end
+	if plyr.invul>0 then
+		plyr.invul-=1
 	end
 	
 	if btn(➡️) 
@@ -282,16 +281,40 @@ function updt_plyr()
 	for e in all(enemies) do
 		if coll(e,plyr) then
 			plyr_take_dmg(1)
-			e_take_dmg(e,e.hp)
+			e_take_dmg(e,1)
 		end
 	end	
 end
 
 function plyr_take_dmg(dmg)
-	plyr.hp-=dmg
-	if plyr.hp <= 0 then
-		--game over state
-		state=2
+	if plyr.invul<=0 then
+		plyr.hp-=dmg
+		plyr.invul=100
+		if plyr.hp <= 0 then
+			--game over state
+			state=2
+		end
+	end
+end
+
+function drw_plyr()
+	if plyr.invul>0 then
+		if sin(t/10)<0.1 then
+			draw=true
+		else
+			draw=false
+		end
+	else
+		draw=true
+	end
+	
+	if draw then
+		spr(plyr.sprt,plyr.x,plyr.y)
+		spr(
+			plyr.flamespr,
+			plyr.x,
+			plyr.y+8
+		)
 	end
 end
 -->8
