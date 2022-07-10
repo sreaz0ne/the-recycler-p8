@@ -94,12 +94,14 @@ function init_game()
 	enemies={}
 	init_plyr()
 	state=1
+	expls={}
 end
 
 function updt_game()
 	t+=1
 	
 	updt_stars()
+	updt_expls()
 	updt_enemies()
 	updt_plyr()
 	updt_bullets()
@@ -136,6 +138,8 @@ function draw_game()
 	for b in all(bullets) do 
 		spr(b.sprt,b.x,b.y)
 	end
+	--expls
+	drw_expls()
 	--** hud **
 	drw_hud()
 end
@@ -285,6 +289,7 @@ function plyr_take_dmg(dmg)
 		plyr.hp-=dmg
 		plyr.invul=100
 		if plyr.hp <= 0 then
+			explod(plyr.x+4,plyr.y+4)
 			--game over state
 			state=2
 		end
@@ -367,6 +372,7 @@ function e_take_dmg(e,dmg)
 	e.hp-=dmg
 	e.flsh=4
 	if e.hp <= 0 then
+		explod(e.x+4,e.y+4)
 		del(enemies,e)
 		score+=100
 	end
@@ -453,6 +459,71 @@ function drw_hud()
 		8
 	)
 	spr(50,1,1)
+end
+-->8
+--explosions
+
+function explod(ex,ey)
+	local expl={}
+	local prt={
+		x=ex,
+		y=ey,
+		sx=0,
+		sy=0,
+		age=0,
+		mxage=0,
+		colr=7,
+		sz=9
+	}
+	
+	add(expl,prt)
+	for i=1,30 do
+		local prt={
+			x=ex,
+			y=ey,
+			sx=rnd()*4-2,
+			sy=rnd()*4-2,
+			age=rnd(3),
+			mxage=10+rnd(15),
+			colr=7,
+			sz=rnd(4)+1
+		}
+		
+		add(expl,prt)
+	end
+	add(expls,expl)
+end
+
+function updt_expls()
+	for e in all(expls) do
+		for p in all(e) do
+			p.x+=p.sx
+			p.y+=p.sy
+			p.sx=p.sx*0.87
+			p.sy=p.sy*0.87
+			
+			if (p.age>4) p.colr=10
+			if (p.age>7) p.colr=9
+			if (p.age>11) p.colr=8
+			if (p.age>16) p.colr=2
+			if (p.age>20) p.colr=5
+			
+			p.age+=1
+			if p.age>p.mxage then
+				p.sz-=0.2
+				if (p.sz<=0) del(e,p)
+			end
+		end
+		if (#e==0) del(expls,e)
+	end
+end
+
+function drw_expls()
+	for e in all(expls) do
+		for p in all(e) do
+			circfill(p.x,p.y,p.sz,p.colr)
+		end
+	end
 end
 __gfx__
 00066000000066000066000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
