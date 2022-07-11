@@ -95,6 +95,7 @@ function init_game()
 	init_plyr()
 	state=1
 	expls={}
+	timetogo=0
 end
 
 function updt_game()
@@ -105,6 +106,14 @@ function updt_game()
 	updt_enemies()
 	updt_plyr()
 	updt_bullets()
+	
+	
+	if timetogo<=0 
+	and plyr.hp<=0 
+	and chck_plyr_bllt()==0 then
+		state=2
+	end
+	if (timetogo>0) timetogo-=1
 	
 	if #enemies==0 then
 		spwn_enemies(flr(rnd(9))+1)
@@ -146,7 +155,13 @@ end
 
 -- ** game over **
 function updt_gameover()
-	if (btn(❎)) init_game()
+	if btn(❎)
+	and isshting==0 then
+	 init_game()
+	elseif btn(❎)==false
+	   and isshting==1 then
+		isshting=0
+	end
 end
 
 function draw_gameover()
@@ -221,12 +236,15 @@ function init_plyr()
 		box={x1=2,x2=5,y1=1,y2=6},
 		sprt=0,
 		flamespr=16,
-		timetoshoot=10,
+		timetoshoot=9,
 		invul=0
 	}
 end
 
 function updt_plyr()
+	
+	if (plyr.hp<=0) return
+
 	fsmax=19
 	fsmin=16
 	plyr.sprt=0
@@ -265,6 +283,7 @@ function updt_plyr()
 	and plyr.timetoshoot==0 then
 		shoot(plyr)
 		plyr.timetoshoot=8
+		isshting=1
 	end
 	--animate player flame
 	if (t%4==0) then
@@ -287,16 +306,20 @@ end
 function plyr_take_dmg(dmg)
 	if plyr.invul<=0 then
 		plyr.hp-=dmg
-		plyr.invul=100
 		if plyr.hp <= 0 then
 			explod(plyr.x+4,plyr.y+4)
-			--game over state
-			state=2
+			--time to game over
+			timetogo=80
+		else
+			plyr.invul=120
 		end
 	end
 end
 
 function drw_plyr()
+
+	if (plyr.hp<=0) return
+	
 	if plyr.invul>0 then
 		if sin(t/10)<0.1 then
 			draw=true
@@ -431,11 +454,20 @@ function updt_bullets()
 				end
 			end
 		elseif b.btype=="e" then
-			if coll(b,plyr) then
+			if coll(b,plyr) 
+			and plyr.hp>0 then
 				del(bullets,b)
 				plyr_take_dmg(1)
 			end
 		end
+		
+	end
+end
+
+function chck_plyr_bllt()
+	for b in all(bullets) do
+		if (b.btype=="p") return 1
+		return 0
 	end
 end
 -->8
