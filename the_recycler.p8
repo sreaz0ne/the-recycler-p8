@@ -528,6 +528,9 @@ function drw_hud()
 	if plyr.ammo==0 then
 		pal(3,8)
 		pal(11,9)
+	elseif plyr.ammo/plyr.ammomax<=0.3 then
+		pal(3,9)
+		pal(11,10)
 	end
 	rect(1,60,3,126,3)
 	if plyr.ammo>0 then
@@ -545,7 +548,10 @@ function drw_hud()
 	if vcm.energy<vcm.gemax then
 		if vcm.needfullcharg==1 then
 			pal(1,8)
-			pal(12,9)
+			pal(12,14)
+		elseif vcm.energy/vcm.gemax<=0.3 then
+			pal(1,9)
+			pal(12,10)
 		end
 		rect(5,60,7,120,1)
 		if vcm.energy>0 then
@@ -637,8 +643,8 @@ function init_vacumm_part()
 		vspeed=0.6,
 		energy=nil,
 		gemax=40,
-		chargspeed=0.2,
-		dischargspeed=0.6,
+		chargspeed=0.15,
+		dischargspeed=0.55,
 		needfullcharg=0
 	}
 	vcmpart={}
