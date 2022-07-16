@@ -525,6 +525,10 @@ function drw_hud()
 	end
 	spr(50,1,1)
 	--ammo bar
+	if plyr.ammo==0 then
+		pal(3,8)
+		pal(11,9)
+	end
 	rect(1,60,3,126,3)
 	if plyr.ammo>0 then
 		rectfill(
@@ -536,6 +540,7 @@ function drw_hud()
 		)
 	end
 	print("ammo",5,122,3)
+	pal()
 	--energy bar
 	if vcm.energy<vcm.gemax then
 		if vcm.needfullcharg==1 then
