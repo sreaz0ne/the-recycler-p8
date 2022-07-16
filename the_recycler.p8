@@ -96,6 +96,7 @@ function init_game()
 	state=1
 	expls={}
 	timetogo=0
+	init_vacumm_part()
 end
 
 function updt_game()
@@ -105,6 +106,7 @@ function updt_game()
 	updt_expls()
 	updt_enemies()
 	updt_plyr()
+	updt_vcm()
 	updt_bullets()
 	
 	
@@ -143,6 +145,8 @@ function draw_game()
 	end
 	--ship
 	drw_plyr()
+	--vacuum cleaner
+	drw_vcm()
 	--bullets
 	for b in all(bullets) do 
 		spr(b.sprt,b.x,b.y)
@@ -226,6 +230,8 @@ end
 --player
 
 function init_plyr()
+	isshting=0
+	isvcm=0
 	plyr={
 		stype="p",
 		x=60,
@@ -236,8 +242,10 @@ function init_plyr()
 		box={x1=2,x2=5,y1=1,y2=6},
 		sprt=0,
 		flamespr=16,
-		timetoshoot=9,
-		invul=0
+		timetoshoot=11,
+		invul=0,
+		ammo=30,
+		ammomax=30
 	}
 end
 
@@ -280,11 +288,24 @@ function updt_plyr()
 	end
 	
 	if btn(❎)
-	and plyr.timetoshoot==0 then
+	and plyr.timetoshoot==0
+	and isvcm==0
+	and plyr.ammo>0 then
 		shoot(plyr)
 		plyr.timetoshoot=8
+		plyr.ammo-=1
 		isshting=1
 	end
+	if (btn(❎)==false) isshting=0
+	
+	if btn(🅾️)
+	and isshting==0
+	and vcm.needfullcharg==0 then
+		isvcm=1
+	else
+		isvcm=0
+	end
+	
 	--animate player flame
 	if (t%4==0) then
 		if (plyr.flamespr>=fsmax)
@@ -455,9 +476,19 @@ function updt_bullets()
 			end
 		elseif b.btype=="e" then
 			if coll(b,plyr) 
-			and plyr.hp>0 then
+			and plyr.hp>0 
+			and plyr.invul<=0 then
 				del(bullets,b)
 				plyr_take_dmg(1)
+			end
+			if coll(b,vcm) 
+			and isvcm==1 then
+				b.y+=vcm.vspeed
+				if (b.y+b.box.y2)>=(plyr.y-1) then
+					plyr.ammo+=5
+					if (plyr.ammo>plyr.ammomax) plyr.ammo=plyr.ammomax
+					del(bullets,b)
+				end
 			end
 		end
 		
@@ -483,14 +514,47 @@ function drw_hud()
 	)
 	--hp bar
 	rect(8,3,32,6,5)
-	rectfill(
-		8,
-		4,
-		9+(plyr.hp*(31-9)/plyr.hpmax),
-		5,
-		8
-	)
+	if plyr.hp>0 then
+		rectfill(
+			9,
+			4,
+			9+(plyr.hp*22/plyr.hpmax),
+			5,
+			8
+		)
+	end
 	spr(50,1,1)
+	--ammo bar
+	rect(1,60,3,126,3)
+	if plyr.ammo>0 then
+		rectfill(
+			2,
+			61+(65-(plyr.ammo*65/plyr.ammomax)),
+			2,
+			125,
+			11
+		)
+	end
+	print("ammo",5,122,3)
+	--energy bar
+	if vcm.energy<vcm.gemax then
+		if vcm.needfullcharg==1 then
+			pal(1,8)
+			pal(12,9)
+		end
+		rect(5,60,7,120,1)
+		if vcm.energy>0 then
+			rectfill(
+				6,
+				61+(59-(vcm.energy*59/vcm.gemax)),
+				6,
+				119,
+				12
+			)
+		end
+		print("ge",9,116,1)
+		pal()
+	end
 end
 -->8
 --explosions
@@ -554,6 +618,84 @@ function drw_expls()
 	for e in all(expls) do
 		for p in all(e) do
 			circfill(p.x,p.y,p.sz,p.colr)
+		end
+	end
+end
+-->8
+--vacuum cleaner
+
+function init_vacumm_part()
+	vcm={
+		x=plyr.x,
+		y=nil,
+		box={x1=0,x2=7,y1=0,y2=14},
+		vspeed=0.6,
+		energy=nil,
+		gemax=40,
+		chargspeed=0.2,
+		dischargspeed=0.6,
+		needfullcharg=0
+	}
+	vcmpart={}
+	vcm.y=plyr.y-vcm.box.y2-1
+	vcm.energy=vcm.gemax
+	for i=1,25 do
+	
+		local prt={
+			px=rnd(vcm.box.x2),
+			py=rnd(vcm.box.y2),
+			x=0,
+			y=0,
+			colr=flr(rnd(3))+5
+		}
+		
+		add(vcmpart,prt)
+	end
+end
+
+function updt_vcm()
+	if (plyr.hp<=0) isvcm=0
+	
+	if isvcm==0 
+	and vcm.energy<vcm.gemax then
+		vcm.energy+=vcm.chargspeed
+		if vcm.energy>=vcm.gemax then
+		 vcm.energy=vcm.gemax
+		 vcm.needfullcharg=0
+		end
+	end
+	
+	if isvcm==1 then
+		vcm.energy-=vcm.dischargspeed
+		vcm.x=plyr.x
+		vcm.y=plyr.y-vcm.box.y2-1
+		for v in all(vcmpart) do
+			v.py+=vcm.vspeed
+			v.y=plyr.y-vcm.box.y2-1+v.py
+			if v.px<3.3 then
+				v.px+=0.07
+			elseif v.px>3.7 then
+				v.px-=0.07
+			end
+			v.x=plyr.x+v.px
+			if (v.py>=vcm.box.y2) then
+				v.py=rnd(2)
+				v.px=rnd(vcm.box.x2)
+				v.colr=flr(rnd(3))+5
+			end
+		end
+		
+		if vcm.energy<=0 then
+			vcm.energy=0
+			vcm.needfullcharg=1
+		end
+	end
+end
+
+function drw_vcm()
+	if isvcm==1 then
+		for v in all(vcmpart) do
+			pset(v.x,v.y,v.colr)
 		end
 	end
 end
